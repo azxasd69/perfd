@@ -1,0 +1,55 @@
+{{define "dashboard"}}{{template "head" .}}
+<h1>Стенды и замеры</h1>
+<p class="lead">Данные приходят из конфигурации PerfTest автоматически. Индекс ИИ считается по формуле 1С:
+ 100 × среднее(база / стенд) по парным сценариям, округление до 1 знака.</p>
+
+<section class="cards">
+  <article class="card">
+    <h2>Стендов</h2>
+    <p class="big mono">{{.Counts.Stands}}</p>
+    <p class="muted">поколений с паспортом: {{.Counts.Passports}}</p>
+  </article>
+  <article class="card">
+    <h2>Замеров</h2>
+    <p class="big mono">{{.Counts.Results}}</p>
+    <p class="muted">точек истории: {{.Counts.History}}</p>
+  </article>
+  <article class="card">
+    <h2>Приём</h2>
+    <p class="big mono">{{.Counts.Ingest}}</p>
+    <p class="muted">конвертов в журнале</p>
+  </article>
+  <article class="card">
+    <h2>Сервис</h2>
+    <p class="big mono">{{.Version}}</p>
+    <p class="muted">uptime {{.Uptime}} · схема БД {{.DBSchema}}</p>
+  </article>
+</section>
+
+<section>
+  <h2>Последние состояния</h2>
+  {{if .Stands}}
+  <table class="grid">
+    <thead><tr><th>Стенд</th><th>Платформа</th><th>ОС</th><th class="num">ИИ</th><th class="num">Сценариев</th><th>Последний замер</th></tr></thead>
+    <tbody>
+    {{range .Stands}}
+      <tr>
+        <td><a href="{{$.Base}}/stands/{{.Slug}}">{{.Name}}</a>{{if .PassportMissing}} <span class="tag warn">среда не описана</span>{{end}}</td>
+        <td class="mono">{{.Platform}}</td>
+        <td>{{.OS}}</td>
+        <td class="num mono">{{fmtNum .Index 1}}{{if .LowData}} <span class="tag">мало данных</span>{{end}}</td>
+        <td class="num mono">{{.ScenariosUsed}}</td>
+        <td class="mono">{{fmtTime .LastMeasuredAt}}</td>
+      </tr>
+    {{end}}
+    </tbody>
+  </table>
+  {{else}}
+  <p class="empty">Пока нет ни одного стенда. Это нормально, пока 1С не отправила первый конверт.</p>
+  {{end}}
+</section>
+
+{{if .ReadOnly}}
+<p class="muted">Стенды со статусом «скрыт» не показываются: для полного вида нужен токен чтения.</p>
+{{end}}
+{{template "foot" .}}{{end}}

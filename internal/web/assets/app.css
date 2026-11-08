@@ -1,0 +1,101 @@
+/* Токены кокпита ПерфТест: те же имена, что на страницах 1С (КПР ИН-01). */
+:root {
+  --pf-bg: #f6f7f9;
+  --pf-panel: #ffffff;
+  --pf-fg: #17191f;
+  --pf-muted: #5b6472;
+  --pf-line: #e3e6ea;
+  --pf-nav: #17191f;
+  --pf-accent: #c4f252;
+  --pf-imp: #ff7e70;
+  --pf-radius: 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --pf-bg: #101216;
+    --pf-panel: #17191f;
+    --pf-fg: #e8eaee;
+    --pf-muted: #9aa3b0;
+    --pf-line: #262a32;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--pf-bg);
+  color: var(--pf-fg);
+  font: 15px/1.5 -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.mono { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; }
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  background: var(--pf-nav);
+  color: #fff;
+}
+
+.brand { font-weight: 650; letter-spacing: .2px; }
+
+.chip {
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .12);
+  font-size: 12px;
+}
+
+.chip.mono { color: var(--pf-accent); }
+
+.spacer { flex: 1; }
+
+.wrap {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 24px 18px 40px;
+}
+
+h1 { font-size: 22px; margin: 0 0 6px; }
+h2 { font-size: 14px; text-transform: uppercase; letter-spacing: .06em; color: var(--pf-muted); margin: 0 0 8px; }
+
+.lead { margin: 0 0 20px; color: var(--pf-muted); max-width: 70ch; }
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.card {
+  background: var(--pf-panel);
+  border: 1px solid var(--pf-line);
+  border-radius: var(--pf-radius);
+  padding: 14px 16px;
+}
+
+.big { font-size: 20px; margin: 0 0 6px; }
+.small { font-size: 12.5px; word-break: break-all; margin: 0 0 6px; }
+.muted { color: var(--pf-muted); font-size: 12.5px; margin: 0; }
+
+.kv { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; margin: 0 0 8px; }
+.kv dt { color: var(--pf-muted); font-size: 13px; }
+.kv dd { margin: 0; font-variant-numeric: tabular-nums; }
+
+.links { margin-top: 26px; }
+.links ul { margin: 0; padding-left: 18px; }
+.links li { margin: 4px 0; }
+a { color: #2f6fd0; }
+@media (prefers-color-scheme: dark) { a { color: var(--pf-accent); } }
+
+.foot {
+  border-top: 1px solid var(--pf-line);
+  padding: 12px 18px 24px;
+  color: var(--pf-muted);
+  font-size: 12px;
+  text-align: center;
+}

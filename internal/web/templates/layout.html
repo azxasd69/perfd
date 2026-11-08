@@ -1,0 +1,34 @@
+{{define "head"}}<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>{{.Title}}</title>
+<link rel="stylesheet" href="{{.Base}}/assets/app.css">
+</head>
+<body>
+<header class="topbar">
+  <span class="brand">PerfTest</span>
+  <span class="chip">стенды и замеры</span>
+  <span class="spacer"></span>
+  <span class="chip mono">v{{.Version}}</span>
+</header>
+<nav class="nav">
+  <a href="{{.Base}}/">Дашборд</a>
+  <a href="{{.Base}}/stands">Стенды</a>
+  <a href="{{.Base}}/top">Топ-100</a>
+  <a href="{{.Base}}/api/v1/ratings">Рейтинг (API)</a>
+  <a href="{{.Base}}/about">Методика</a>
+</nav>
+<main class="wrap">
+{{end}}
+
+{{define "foot"}}
+</main>
+<footer class="foot">
+  схема конверта {{.Schema}} · формула ИИ {{.Formula}} · база сравнения <span class="mono">{{.DefaultBase}}</span> · схема БД {{.DBSchema}}
+</footer>
+</body>
+</html>
+{{end}}

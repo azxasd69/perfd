@@ -1,0 +1,30 @@
+{{define "history"}}{{template "head" .}}
+{{if .Error}}
+<h1>Стенд недоступен</h1>
+<p class="empty">{{.Error}}</p>
+{{else}}
+<p class="crumbs"><a href="{{.Base}}/stands">Стенды</a> / <a href="{{.Base}}/stands/{{.Stand.Slug}}">{{.Stand.Name}}</a> / <span>{{.Scenario}}</span></p>
+<h1>История: {{.Scenario}}</h1>
+<p class="lead">Гранулярность: <span class="mono">{{.Granularity}}</span>.
+  Детальный ряд хранится 12 месяцев, дальше — месячные свёртки (бессрочно).</p>
+
+{{if .History}}
+<table class="grid">
+  <thead><tr><th>Момент (UTC)</th><th class="num">Медиана, мс</th><th class="num">мс/ед.</th><th class="num">мин…макс</th><th class="num">Точек</th></tr></thead>
+  <tbody>
+  {{range .History}}
+    <tr>
+      <td class="mono">{{fmtTime .MeasuredAt}}</td>
+      <td class="num mono">{{fmtNum .MedianMs 1}}</td>
+      <td class="num mono">{{fmtNum .PerUnitMs 1}}</td>
+      <td class="num mono">{{fmtNum .MinMs 1}}…{{fmtNum .MaxMs 1}}</td>
+      <td class="num mono">{{.Samples}}</td>
+    </tr>
+  {{end}}
+  </tbody>
+</table>
+{{else}}
+<p class="empty">Точек нет: сценарий ещё не замерялся или вышел за окно хранения.</p>
+{{end}}
+{{end}}
+{{template "foot" .}}{{end}}

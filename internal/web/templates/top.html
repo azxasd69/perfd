@@ -1,0 +1,27 @@
+{{define "top"}}{{template "head" .}}
+<h1>Топ-100 худших сценариев</h1>
+<p class="lead">Сортировка по времени на единицу: чем больше, тем медленнее сценарий относительно порции.
+ Значения за последние 30 дней.</p>
+
+{{if .Top}}
+<table class="grid">
+  <thead><tr><th class="num">#</th><th>Стенд</th><th>Сценарий</th><th>Платформа</th>
+    <th class="num">мс/ед.</th><th class="num">Медиана, мс</th><th>Замер</th></tr></thead>
+  <tbody>
+  {{range $i, $row := .Top}}
+    <tr>
+      <td class="num mono">{{$i}}</td>
+      <td><a href="{{$.Base}}/stands/{{$row.Slug}}">{{$row.Slug}}</a></td>
+      <td class="mono">{{$row.Scenario}}</td>
+      <td class="mono">{{$row.Platform}}</td>
+      <td class="num mono">{{fmtNum $row.PerUnitMs 1}}</td>
+      <td class="num mono">{{fmtNum $row.MedianMs 1}}</td>
+      <td class="mono">{{fmtTime $row.MeasuredAt}}</td>
+    </tr>
+  {{end}}
+  </tbody>
+</table>
+{{else}}
+<p class="empty">Данных за период нет.</p>
+{{end}}
+{{template "foot" .}}{{end}}

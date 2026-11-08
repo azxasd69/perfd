@@ -1,0 +1,91 @@
+{{define "stand"}}{{template "head" .}}
+{{if .Error}}
+<h1>Стенд недоступен</h1>
+<p class="empty">{{.Error}}</p>
+{{else}}
+<p class="crumbs"><a href="{{.Base}}/stands">Стенды</a> / <span>{{.Stand.Name}}</span></p>
+<h1>{{.Stand.Name}}</h1>
+<p class="lead mono">{{.Stand.Slug}}</p>
+
+<section class="cards">
+  <article class="card">
+    <h2>Индекс ИИ</h2>
+    <p class="big mono">{{fmtNum .Stand.Index 1}}</p>
+    <p class="muted">база <span class="mono">{{.DefaultBase}}</span> · парных сценариев {{.Stand.ScenariosUsed}}</p>
+    {{if .Stand.LowData}}<p class="tag warn">мало данных для уверенного ИИ</p>{{end}}
+  </article>
+  <article class="card">
+    <h2>Лучший сценарий</h2>
+    <p class="small mono">{{if .Stand.BestScenario}}{{.Stand.BestScenario}}{{else}}—{{end}}</p>
+    <p class="{{deltaClass nil}} mono">дельта к базе: {{fmtDelta nil}}</p>
+  </article>
+  <article class="card">
+    <h2>Худший сценарий</h2>
+    <p class="small mono">{{if .Stand.WorstScenario}}{{.Stand.WorstScenario}}{{else}}—{{end}}</p>
+    <p class="muted">последний замер: <span class="mono">{{fmtTime .Stand.LastMeasuredAt}}</span></p>
+  </article>
+  <article class="card">
+    <h2>Среда</h2>
+    <p class="small">{{.Stand.Platform}} · {{.Stand.OS}}</p>
+    <p class="muted">{{.Stand.CPU}} · режим {{.Stand.DeployMode}} · <span class="tag">{{.Stand.Visibility}}</span></p>
+  </article>
+</section>
+
+<section>
+  <h2>Сценарии</h2>
+  {{if .Scenarios}}
+  <table class="grid">
+    <thead><tr><th>Код</th><th>Представление</th><th class="num">Медиана, мс</th><th class="num">мс/ед.</th>
+      <th class="num">Дельта к базе</th><th class="num">мин…макс</th><th class="num">Повторов</th><th>Замер</th></tr></thead>
+    <tbody>
+    {{range .Scenarios}}
+      <tr>
+        <td class="mono">{{.Code}}</td>
+        <td>{{.Representation}}</td>
+        <td class="num mono">{{fmtNum .MedianMs 1}}</td>
+        <td class="num mono">{{fmtNum .PerUnitMs 1}} <span class="muted">{{.Unit}}</span></td>
+        <td class="num mono {{deltaClass .DeltaPct}}">{{fmtDelta .DeltaPct}}</td>
+        <td class="num mono">{{fmtNum .MinMs 1}}…{{fmtNum .MaxMs 1}}</td>
+        <td class="num mono">{{.Repeats}}</td>
+        <td class="mono"><a href="{{$.Base}}/stands/{{$.Stand.Slug}}/history/{{.Code}}">{{fmtTime .MeasuredAt}}</a></td>
+      </tr>
+    {{end}}
+    </tbody>
+  </table>
+  {{else}}
+  <p class="empty">Замеров ещё нет — пришёл только паспорт или ничего.</p>
+  {{end}}
+</section>
+
+<section>
+  <h2>Поколения</h2>
+  {{if .Generations}}
+  <table class="grid">
+    <thead><tr><th class="num">id</th><th>Отпечаток</th><th>Платформа</th><th>ЦПУ</th><th>Паспорт</th><th>Первое появление</th></tr></thead>
+    <tbody>
+    {{range .Generations}}
+      <tr>
+        <td class="num mono">{{.ID}}</td>
+        <td class="mono small">{{.Fingerprint}}</td>
+        <td class="mono">{{.Platform}}</td>
+        <td>{{.CPU}}</td>
+        <td>{{if .PassportMissing}}<span class="tag warn">нет</span>{{else}}<span class="tag ok">есть</span>{{end}}</td>
+        <td class="mono">{{fmtTime .FirstSeen}}</td>
+      </tr>
+    {{end}}
+    </tbody>
+  </table>
+  {{end}}
+</section>
+
+{{if .Passport}}
+<section>
+  <h2>Паспорт среды</h2>
+  <p class="muted">Реквизиты приходят от 1С как есть, пароль в строке соединения заменён на <span class="mono">Pwd=***</span>.</p>
+  <pre class="code">{{.Passport}}</pre>
+</section>
+{{else}}
+<section><h2>Паспорт среды</h2><p class="empty">Паспорт для этого поколения не приходил.</p></section>
+{{end}}
+{{end}}
+{{template "foot" .}}{{end}}

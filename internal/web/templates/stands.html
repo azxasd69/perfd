@@ -1,0 +1,31 @@
+{{define "stands"}}{{template "head" .}}
+<h1>Стенды</h1>
+<p class="lead">Один стенд — одна строка. Если железо менялось, у стенда появляется новое поколение:
+ замеры прежнего железа не смешиваются с новыми.</p>
+
+{{if .Stands}}
+<table class="grid">
+  <thead><tr>
+    <th>Стенд</th><th>Платформа</th><th>ОС</th><th>ЦПУ</th><th>Режим ИБ</th>
+    <th class="num">ИИ</th><th class="num">Сценариев</th><th>Последний замер</th><th>Видимость</th>
+  </tr></thead>
+  <tbody>
+  {{range .Stands}}
+    <tr>
+      <td><a href="{{$.Base}}/stands/{{.Slug}}">{{.Name}}</a></td>
+      <td class="mono">{{.Platform}}</td>
+      <td>{{.OS}}</td>
+      <td>{{.CPU}}</td>
+      <td>{{.DeployMode}}</td>
+      <td class="num mono">{{fmtNum .Index 1}}{{if .LowData}} <span class="tag">мало данных</span>{{end}}</td>
+      <td class="num mono">{{.ScenariosUsed}}</td>
+      <td class="mono">{{fmtTime .LastMeasuredAt}}</td>
+      <td><span class="tag">{{.Visibility}}</span></td>
+    </tr>
+  {{end}}
+  </tbody>
+</table>
+{{else}}
+<p class="empty">Стендов нет. Первый конверт создаст стенд автоматически.</p>
+{{end}}
+{{template "foot" .}}{{end}}
