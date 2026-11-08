@@ -179,6 +179,7 @@ func run() error {
 		DefaultBase:       cfg.DefaultBase,
 		IngestTokenSHA256: cfg.TokenSHA256,
 		Channels:          cfg.Channels,
+		StatusHost:        cfg.StatusHost,
 	})
 	if err != nil {
 		return err

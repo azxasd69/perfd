@@ -2,6 +2,7 @@ package web
 
 import (
 	"crypto/rand"
+	"encoding/json"
 	"encoding/hex"
 	"fmt"
 	"net/http"
@@ -473,3 +474,10 @@ func (r rawJSON) MarshalJSON() ([]byte, error) {
 }
 
 var _ = os.Getpid
+
+// newJSONEncoder отдаёт JSON без экранирования HTML.
+func newJSONEncoder(w http.ResponseWriter) *json.Encoder {
+	enc := json.NewEncoder(w)
+	enc.SetEscapeHTML(false)
+	return enc
+}

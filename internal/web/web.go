@@ -36,6 +36,7 @@ type Options struct {
 	DefaultBase      string
 	IngestTokenSHA256 string
 	Channels         []string
+	StatusHost       string
 }
 
 // Server держит зависимости обработчиков.
@@ -98,6 +99,7 @@ func (s *Server) Handler() http.Handler {
 
 	// Чтение API.
 	mux.HandleFunc("GET "+base+"/api/v1/meta", s.handleMeta)
+	mux.HandleFunc("GET "+base+"/api/v1/status", s.handleStatus)
 	mux.HandleFunc("GET "+base+"/api/v1/stands", s.apiListStands)
 	mux.HandleFunc("GET "+base+"/api/v1/stands/{slug}", s.apiStand)
 	mux.HandleFunc("GET "+base+"/api/v1/stands/{slug}/results", s.apiStandResults)

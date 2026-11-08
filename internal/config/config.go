@@ -38,6 +38,7 @@ type Config struct {
 	SMTPPass      string
 	AlertWebhook  string        // webhook оповещений
 	AlertCooldown time.Duration // пауза между повторными алертами одного правила
+	StatusHost    string        // адрес машины для проверки портов postfix/dovecot/dns
 }
 
 // Load собирает конфигурацию и проверяет её целостность.
@@ -67,6 +68,7 @@ func Load() (Config, error) {
 		SMTPPass:         env("PERF_SMTP_PASS", ""),
 		AlertWebhook:     env("PERF_ALERT_WEBHOOK", ""),
 		AlertCooldown:    envDuration("PERF_ALERT_COOLDOWN", 30*time.Minute),
+		StatusHost:       env("PERF_STATUS_HOST", ""),
 	}
 
 	if env("PERF_ALLOW_HTTP", "off") != "off" {
