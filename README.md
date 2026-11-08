@@ -111,6 +111,35 @@ $env:PERF_BASE_PATH = '/perf'
 
 Скрипты контура: `deploy\lab\update-lab.sh` (обновление сборки), `checks-lab*.sh`, `checks-watch.sh`, `checks-e4.sh`.
 
+## Транспорты каналов 5а/5б/6/7/8 (08.11.2026)
+
+Развёрнуты на контуре вместе с пятью юнитами. Состав:
+
+| Файл | Что настраивает |
+|---|---|
+| `deploy\app-perfd.service` | приём HTTP, витрины, API (96 МБ) |
+| `deploy\app-perfd-watch.service` | обход `in/webdav|ftps|sftp`, `.ack`/`.err`, архив (64 МБ) |
+| `deploy\app-perfd-mail.service` | Maildir `perfing` → конвейер, ack в `perfack` (64 МБ) |
+| `deploy\app-perfd-dns.service` | TXT-конверты зоны, 53/tcp, `CAP_NET_BIND_SERVICE` (48 МБ) |
+| `deploy\app-perfd-alerts.service` | 4 правила, webhook и почта (32 МБ) |
+| `deploy\vsftpd.conf` | FTPS: только TLS, пассивный 30000–30010, chroot `perfdrop` |
+| `deploy\postfix-main.cf`, `postfix-master.cf` | submission 587/465 с SASL, доставка только локальная |
+| `deploy\dovecot-99-perf.conf` | IMAP 993, passwd-file, SASL-сокет для postfix |
+| `deploy\sshd-99-perf.conf` | `Match User perfdrop`: chroot, `internal-sftp`, только ключ |
+
+Скрипты контура: `deploy\lab\install-transports.sh` (пакеты, учётки, каталоги, юниты), `fix-*.sh` (пошаговые исправления, описаны в отчёте § 8.2), `diag-*.sh` (диагностика каналов), `checks-lab*.sh`.
+
+Проверка всех каналов одной командой:
+
+```powershell
+python scratch\check-channels.py --token <токен> --ftp-pass <пароль perfdrop> `
+    --mail-pass <пароль perfing> --mail-pass-ack <пароль perfack>
+```
+
+Ожидаемый результат — 8/8: FTPS, WebDAV, SFTP, SMTP submission, IMAP (оба ящика), DNS и `healthz/channels` со счётчиками по каждому каналу.
+
+**Отступления от Приложения В** (все с причинами, см. § 8.2 отчёта): в `vsftpd.conf` нет `ssl_tlsv1_2/3` (сборка 3.0.5 их не знает), сертификат объявлен до `ssl_enable`, добавлен `check_shell=NO`; `master.cf` взят штатный (без `proxymap` smtpd зависает), chroot у submission выключен; `mail_location` и ack-каталог — `<u>/Maildir`; chroot SFTP — `/srv/perf-sftp` (sshd требует root-owned путь).
+
 ## Тестовый контур Hyper-V (08.11.2026)
 
 Стенд, повторяющий среду VDS, живёт в Hyper-V на этой машине: VM `perf-test`, Ubuntu 24.04.5, 1 vCPU, 896 МБ, VHDX 15 ГБ на `D:\hyperv\perf-test`, гость `172.28.0.10` (внутренний коммутатор `perf-lab` + NAT).

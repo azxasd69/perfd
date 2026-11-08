@@ -1,0 +1,34 @@
+[Unit]
+Description=PerfTest portal (perfd): приём конвертов, витрины, API
+Documentation=https://testib.ru/perf/about
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=perf
+Group=perf
+WorkingDirectory=/var/lib/perf
+EnvironmentFile=/etc/perf/perfd.env
+ExecStart=/usr/local/bin/perfd
+Restart=always
+RestartSec=3
+MemoryMax=96M
+TasksMax=128
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+ProtectKernelModules=true
+ProtectClock=true
+RestrictSUIDSGID=true
+LockPersonality=true
+ReadWritePaths=/var/lib/perf /var/log/perf
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

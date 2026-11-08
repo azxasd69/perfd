@@ -261,7 +261,7 @@ func (s *Server) handleChannels(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{
 		"channels": channels,
 		"enabled":  s.opts.Channels,
-		"data_channels": []string{"http", "webdav"},
+		"data_channels": dataChannels(s.opts.Channels),
 		"closed":        []string{"http80"},
 	})
 }
@@ -302,3 +302,15 @@ func clientIP(r *http.Request) string {
 }
 
 var errNoAuth = errors.New("нет авторизации")
+
+// dataChannels — включённые каналы, которые несут данные (канал 4 не в счёт).
+func dataChannels(enabled []string) []string {
+	out := make([]string, 0, len(enabled))
+	for _, ch := range enabled {
+		if ch == "http80" {
+			continue
+		}
+		out = append(out, ch)
+	}
+	return out
+}

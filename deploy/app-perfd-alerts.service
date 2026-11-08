@@ -1,0 +1,30 @@
+[Unit]
+Description=PerfTest: оповещения — почта, webhook, метрики
+Documentation=https://testib.ru/perf/about
+After=network-online.target app-perfd.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=perf
+Group=perf
+WorkingDirectory=/var/lib/perf
+EnvironmentFile=/etc/perf/perfd.env
+ExecStart=/usr/local/bin/perfd -alerts -db /var/lib/perf/perf.db -metrics-addr 127.0.0.1:9091
+Restart=always
+RestartSec=10
+MemoryMax=32M
+TasksMax=64
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+ReadWritePaths=/var/lib/perf /var/log/perf
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

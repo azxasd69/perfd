@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // Config - полный набор настроек процесса.
@@ -25,6 +26,18 @@ type Config struct {
 	Channels    []string // включённые каналы (ТЗ § 6.5)
 	RetentionMonths int  // срок хранения детального ряда, мес.
 	RetentionLogDays int // срок хранения журнала приёма, дней
+
+	Maildir       string        // /var/mailvhost — Maildir канала 6
+	DNSListen     string        // адрес DNS-приёмника, например 91.188.222.193:53
+	DNSZone       string        // зона, в которой принимаются TXT-конверты
+	AlertEmail    string        // получатель алертов
+	AlertFrom     string        // отправитель алертов
+	SMTPHost      string        // релей провайдера для писем-алертов
+	SMTPPort      int
+	SMTPUser      string
+	SMTPPass      string
+	AlertWebhook  string        // webhook оповещений
+	AlertCooldown time.Duration // пауза между повторными алертами одного правила
 }
 
 // Load собирает конфигурацию и проверяет её целостность.
@@ -43,6 +56,17 @@ func Load() (Config, error) {
 		Channels:    splitList(env("PERF_CHANNELS", "http,webdav")),
 		RetentionMonths:  int(envInt("PERF_RETAIN_MONTHS", 12)),
 		RetentionLogDays: int(envInt("PERF_RETAIN_LOG_DAYS", 90)),
+		Maildir:          env("PERF_MAILDIR", "/var/mailvhost"),
+		DNSListen:        env("PERF_DNS_LISTEN", "127.0.0.1:53"),
+		DNSZone:          env("PERF_DNS_ZONE", "t.perftest.testib.ru"),
+		AlertEmail:       env("PERF_ALERT_EMAIL", ""),
+		AlertFrom:        env("PERF_ALERT_FROM", "perf@testib.ru"),
+		SMTPHost:         env("PERF_SMTP_HOST", ""),
+		SMTPPort:         int(envInt("PERF_SMTP_PORT", 587)),
+		SMTPUser:         env("PERF_SMTP_USER", ""),
+		SMTPPass:         env("PERF_SMTP_PASS", ""),
+		AlertWebhook:     env("PERF_ALERT_WEBHOOK", ""),
+		AlertCooldown:    envDuration("PERF_ALERT_COOLDOWN", 30*time.Minute),
 	}
 
 	if env("PERF_ALLOW_HTTP", "off") != "off" {
@@ -92,4 +116,13 @@ func splitList(v string) []string {
 		}
 	}
 	return out
+}
+
+func envDuration(key string, def time.Duration) time.Duration {
+	if v, ok := os.LookupEnv(key); ok {
+		if d, err := time.ParseDuration(strings.TrimSpace(v)); err == nil && d > 0 {
+			return d
+		}
+	}
+	return def
 }

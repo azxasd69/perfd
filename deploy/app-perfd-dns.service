@@ -1,0 +1,31 @@
+[Unit]
+Description=PerfTest: DNS-приёмник (канал 8) — TXT-конверты своей зоны
+Documentation=https://testib.ru/perf/about
+After=network-online.target app-perfd.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=perf
+Group=perf
+WorkingDirectory=/var/lib/perf
+EnvironmentFile=/etc/perf/perfd.env
+ExecStart=/usr/local/bin/perfd -dns -db /var/lib/perf/perf.db -listen ${PERF_DNS_LISTEN} -zone ${PERF_DNS_ZONE}
+Restart=always
+RestartSec=5
+MemoryMax=48M
+TasksMax=64
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+ReadWritePaths=/var/lib/perf /var/log/perf
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

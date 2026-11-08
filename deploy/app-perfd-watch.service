@@ -1,0 +1,30 @@
+[Unit]
+Description=PerfTest: файловый приёмник (WebDAV, FTPS, SFTP) — обход in/
+Documentation=https://testib.ru/perf/about
+After=network-online.target app-perfd.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=perf
+Group=perf
+WorkingDirectory=/var/lib/perf
+EnvironmentFile=/etc/perf/perfd.env
+ExecStart=/usr/local/bin/perfd -watch -db /var/lib/perf/perf.db -in /var/lib/perf/in -out /var/lib/perf/out -archive /var/lib/perf/archive
+Restart=always
+RestartSec=5
+MemoryMax=64M
+TasksMax=64
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+ReadWritePaths=/var/lib/perf /var/log/perf
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -15,7 +15,10 @@ import (
 	"syscall"
 	"time"
 
+	"perfd/internal/alerts"
 	"perfd/internal/config"
+	"perfd/internal/dnssrv"
+	"perfd/internal/maildrop"
 	"perfd/internal/model"
 	"perfd/internal/obs"
 	"perfd/internal/store"
@@ -43,6 +46,13 @@ func run() error {
 		archiveDir    = flag.String("archive", "/var/lib/perf/archive", "архив обработанных файлов")
 		channel       = flag.String("channel", "webdav", "имя канала для файлового приёма: webdav|ftps|sftp")
 		version       = flag.Bool("version", false, "напечатать версию и выйти")
+		modeMail      = flag.Bool("mail", false, "почтовый приёмник: Maildir perfing -> конвейер, ack в perfack")
+		modeDNS       = flag.Bool("dns", false, "DNS-приёмник TXT-конвертов по TCP")
+		modeAlerts    = flag.Bool("alerts", false, "оповещения: почта, webhook, метрики")
+		maildir       = flag.String("maildir", "", "корень Maildir (по умолчанию PERF_MAILDIR)")
+		listenDNS     = flag.String("listen", "", "адрес DNS-приёмника (по умолчанию PERF_DNS_LISTEN)")
+		zoneDNS       = flag.String("zone", "", "зона DNS (по умолчанию PERF_DNS_ZONE)")
+		metricsAddr   = flag.String("metrics-addr", "127.0.0.1:9091", "адрес метрик для режима -alerts")
 	)
 	flag.Parse()
 
@@ -123,6 +133,40 @@ func run() error {
 		return watch.Run(ctx, st, log, watch.Options{
 			InDir: *inDir, OutDir: *outDir, ArchiveDir: *archiveDir,
 			Channel: *channel, Formula: cfg.Formula,
+		})
+
+	case *modeMail:
+		ctx, cancel := signalContext()
+		defer cancel()
+		root := *maildir
+		if root == "" {
+			root = cfg.Maildir
+		}
+		log.Info("perfd -mail", "maildir", root, "version", web.Version)
+		return maildrop.Run(ctx, st, log, maildrop.Options{MailRoot: root, Formula: cfg.Formula})
+
+	case *modeDNS:
+		ctx, cancel := signalContext()
+		defer cancel()
+		addr := *listenDNS
+		if addr == "" {
+			addr = cfg.DNSListen
+		}
+		zone := *zoneDNS
+		if zone == "" {
+			zone = cfg.DNSZone
+		}
+		log.Info("perfd -dns", "listen", addr, "zone", zone, "version", web.Version)
+		return dnssrv.New(st, log, dnssrv.Options{Listen: addr, Zone: zone, Formula: cfg.Formula}).Run(ctx)
+
+	case *modeAlerts:
+		ctx, cancel := signalContext()
+		defer cancel()
+		log.Info("perfd -alerts", "metrics", *metricsAddr, "version", web.Version)
+		return alerts.Run(ctx, st, log, alerts.Options{
+			Webhook: cfg.AlertWebhook, SMTPHost: cfg.SMTPHost, SMTPPort: cfg.SMTPPort,
+			SMTPUser: cfg.SMTPUser, SMTPPass: cfg.SMTPPass, From: cfg.AlertFrom, To: cfg.AlertEmail,
+			Cooldown: cfg.AlertCooldown, LogPath: "/var/log/perf/alerts.log", Channels: cfg.Channels,
 		})
 	}
 

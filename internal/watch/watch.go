@@ -69,11 +69,26 @@ func Run(ctx context.Context, st *store.Store, log *slog.Logger, opts Options) e
 	}
 }
 
+// Каналы файлового приёма: подкаталоги in/<канал>/ — так журнал различает транспорт.
+var fileChannels = []string{"webdav", "ftps", "sftp"}
+
 // scan обрабатывает готовые файлы: размер не менялся StableFor.
 func scan(ctx context.Context, st *store.Store, log *slog.Logger, opts Options, lastSize map[string]int64) {
-	entries, err := os.ReadDir(opts.InDir)
+	scanDir(ctx, st, log, opts, opts.InDir, opts.Channel, lastSize)
+	for _, ch := range fileChannels {
+		dir := filepath.Join(opts.InDir, ch)
+		if info, err := os.Stat(dir); err == nil && info.IsDir() {
+			scanDir(ctx, st, log, opts, dir, ch, lastSize)
+		}
+	}
+}
+
+func scanDir(ctx context.Context, st *store.Store, log *slog.Logger, opts Options, dir, channel string, lastSize map[string]int64) {
+	entries, err := os.ReadDir(dir)
 	if err != nil {
-		log.Error("чтение каталога приёма", "err", err)
+		if !os.IsNotExist(err) {
+			log.Error("чтение каталога приёма", "dir", dir, "err", err)
+		}
 		return
 	}
 	for _, e := range entries {
@@ -84,7 +99,7 @@ func scan(ctx context.Context, st *store.Store, log *slog.Logger, opts Options, 
 		if !strings.HasSuffix(name, ".json") {
 			continue
 		}
-		path := filepath.Join(opts.InDir, name)
+		path := filepath.Join(dir, name)
 
 		info, err := os.Stat(path)
 		if err != nil {
@@ -115,7 +130,7 @@ func scan(ctx context.Context, st *store.Store, log *slog.Logger, opts Options, 
 		accepted, duplicates, rejected := 0, 0, 0
 		for _, env := range batch.Batch {
 			out, err := st.Ingest(ctx, store.EnvelopeInput{
-				Envelope: env, Channel: opts.Channel, RemoteAddr: "file:" + name, RequestID: id, Formula: opts.Formula,
+				Envelope: env, Channel: channel, RemoteAddr: "file:" + name, RequestID: id, Formula: opts.Formula,
 			})
 			if err != nil {
 				log.Error("приём из файла", "file", name, "err", err)

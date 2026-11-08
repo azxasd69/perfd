@@ -1,0 +1,31 @@
+[Unit]
+Description=PerfTest: почтовый приёмник (канал 6) — Maildir perfing -> конвейер, ack в perfack
+Documentation=https://testib.ru/perf/about
+After=network-online.target app-perfd.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=perf
+Group=perf
+SupplementaryGroups=perfing perfack
+WorkingDirectory=/var/lib/perf
+EnvironmentFile=/etc/perf/perfd.env
+ExecStart=/usr/local/bin/perfd -mail -db /var/lib/perf/perf.db -maildir /var/mailvhost
+Restart=always
+RestartSec=5
+MemoryMax=64M
+TasksMax=64
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+ReadWritePaths=/var/lib/perf /var/log/perf /var/mailvhost
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

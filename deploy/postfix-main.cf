@@ -1,0 +1,27 @@
+# Канал 6: только submission с SASL (587) и неявный TLS (465), доставка только локальная.
+# Наружу сервер писать не может: default_transport = error, relayhost пуст (ТЗ Р-15).
+
+myhostname = testib.ru
+mydomain = testib.ru
+myorigin = $mydomain
+inet_interfaces = 172.28.0.10
+inet_protocols = ipv4
+mydestination = testib.ru, localhost
+home_mailbox = Maildir/
+
+default_transport = error
+relayhost =
+smtpd_sasl_type = dovecot
+smtpd_sasl_path = private/auth
+smtpd_sasl_auth_enable = yes
+smtpd_sasl_security_options = noanonymous
+smtpd_tls_auth_only = yes
+smtpd_tls_security_level = encrypt
+smtpd_tls_cert_file = /etc/perf/tls/lab.crt
+smtpd_tls_key_file = /etc/perf/tls/lab.key
+smtp_tls_security_level = none
+message_size_limit = 5242880
+mailbox_size_limit = 209715200
+disable_vrfy_command = yes
+smtpd_helo_required = yes
+smtpd_recipient_restrictions = permit_sasl_authenticated, reject
