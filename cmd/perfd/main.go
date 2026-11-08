@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 
@@ -180,6 +181,7 @@ func run() error {
 		IngestTokenSHA256: cfg.TokenSHA256,
 		Channels:          cfg.Channels,
 		StatusHost:        cfg.StatusHost,
+		PurgeRoots:        purgeRoots(*inDir, *outDir, *archiveDir, &cfg),
 	})
 	if err != nil {
 		return err
@@ -224,8 +226,30 @@ func run() error {
 	}
 }
 
-func signalContext() (context.Context, context.CancelFunc) {
-	ctx, cancel := context.WithCancel(context.Background())
+// purgeRoots — что чистит кнопка «Очистить данные»: каталоги каналов обмена
+// (удаляется содержимое, сами каталоги остаются — иначе файловый приёмник
+// и WebDAV потеряют точки монтирования) плюс снимки базы и почтовые ящики приёма.
+//
+// СОЗНАТЕЛЬНО НЕ ЧИСТИТСЯ: /var/lib/perf/sftp — это chroot канала SFTP
+// с .ssh/authorized_keys; удаление содержимого отрезало бы канал и сам доступ.
+func purgeRoots(inDir, outDir, archiveDir string, cfg *config.Config) []string {
+	dataDir := filepath.Dir(inDir)
+	roots := []string{
+		inDir, outDir, archiveDir,
+		filepath.Join(dataDir, "quarantine"),
+		filepath.Join(dataDir, "tmp"),
+		filepath.Join(dataDir, "perf-snap.db.gz"),
+		filepath.Join(dataDir, "perf-snap.db.gz.manifest.json"),
+	}
+	if cfg.Maildir != "" {
+		roots = append(roots,
+			filepath.Join(cfg.Maildir, "perfing"),
+			filepath.Join(cfg.Maildir, "perfack"))
+	}
+	return roots
+}
+
+func signalContext() (context.Context, context.CancelFunc) {	ctx, cancel := context.WithCancel(context.Background())
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
 	go func() {

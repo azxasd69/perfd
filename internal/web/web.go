@@ -37,6 +37,9 @@ type Options struct {
 	IngestTokenSHA256 string
 	Channels         []string
 	StatusHost       string
+	// PurgeRoots — каталоги и файлы обмена, которые удаляет очистка данных
+	// (содержимое каталогов чистится, сами каталоги остаются).
+	PurgeRoots []string
 }
 
 // Server держит зависимости обработчиков.
@@ -107,6 +110,10 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET "+base+"/api/v1/top", s.apiTop)
 	mux.HandleFunc("GET "+base+"/api/v1/ratings", s.apiRatings)
 	mux.HandleFunc("GET "+base+"/api/v1/compare", s.apiCompare)
+
+	// Очистка данных обмена (кнопка «Очистить данные» в панели состояния):
+	// только POST, только роль admin, обязательное слово подтверждения.
+	mux.HandleFunc("POST "+base+"/api/admin/purge", s.handleAdminPurge)
 
 	// Статика и страницы.
 	mux.Handle("GET "+base+"/assets/", http.StripPrefix(base+"/assets/", cacheForever(s.assets)))
