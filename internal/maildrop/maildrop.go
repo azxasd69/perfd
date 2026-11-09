@@ -255,8 +255,8 @@ func decodePart(body []byte, enc string) ([]byte, error) {
 func deliver(ackDir string, ack Ack) error {
 	body, _ := json.Marshal(ack)
 	var buf bytes.Buffer
-	fmt.Fprintf(&buf, "From: perfd <perfd@testib.ru>\r\n")
-	fmt.Fprintf(&buf, "To: perfack@testib.ru\r\n")
+	fmt.Fprintf(&buf, "From: perfd <perfd@perf.ru>\r\n")
+	fmt.Fprintf(&buf, "To: perfack@perf.ru\r\n")
 	fmt.Fprintf(&buf, "Subject: perf ack %s\r\n", ack.ID)
 	fmt.Fprintf(&buf, "Date: %s\r\n", time.Now().UTC().Format(time.RFC1123Z))
 	fmt.Fprintf(&buf, "Message-ID: <%d.%s@perf>\r\n", time.Now().UnixNano(), ack.ID)

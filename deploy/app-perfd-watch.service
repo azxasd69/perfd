@@ -1,6 +1,6 @@
 [Unit]
 Description=PerfTest: файловый приёмник (WebDAV, FTPS, SFTP) — обход in/
-Documentation=https://testib.ru/perf/about
+Documentation=https://perf.example.com/perf/about
 After=network-online.target app-perfd.service
 Wants=network-online.target
 

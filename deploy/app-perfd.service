@@ -1,6 +1,6 @@
 [Unit]
 Description=PerfTest portal (perfd): приём конвертов, витрины, API
-Documentation=https://testib.ru/perf/about
+Documentation=https://perf.example.com/perf/about
 After=network-online.target
 Wants=network-online.target
 

@@ -1,6 +1,6 @@
 [Unit]
 Description=PerfTest: DNS-приёмник (канал 8) — TXT-конверты своей зоны
-Documentation=https://testib.ru/perf/about
+Documentation=https://perf.example.com/perf/about
 After=network-online.target app-perfd.service
 Wants=network-online.target
 
